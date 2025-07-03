@@ -109,8 +109,35 @@ Where:
 
 ### Anomaly Detection
 
+![alt text](image-2.png)
 
+### Experimentation
 
+d = 100
+
+s = 10
+
+### Codes
+
+* Anoamly-detection: Ok! - Not Ok Now(Seemingly due to virtual memory not enough?)
+* Training: Not Ok
+
+```
+   Traceback (most recent call last):
+   File "main.py", line 102, in <module>
+      pikachu.learn_embedding(weight_file)
+   File "F:\gitgit\Pikachu\pikachu.py", line 140, in learn_embedding
+      dynamic_embs = self.long_term_embedding(short_term_embs)
+   File "F:\gitgit\Pikachu\pikachu.py", line 101, in long_term_embedding
+      self.model, self.encoder = self.autoencoder_model(time_step, dim)
+   File "F:\gitgit\Pikachu\pikachu.py", line 82, in autoencoder_model
+      el1 = GRU(64, return_sequences=True)(mask)
+   ...
+
+   NotImplementedError: Cannot convert a symbolic Tensor (gru/strided_slice:0) to a numpy array.
+```
+
+Debugging...
 
 
 
