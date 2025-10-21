@@ -206,6 +206,8 @@ python flask_session_cookie_manager3.py encode -s "ckj123" -t "{'_fresh':True,'_
 
 在repeater中用这段cookie进行替换，访问index页，即可得到flag!!!
 
+关于网页cookie的欺骗还可以有很多内容，值得研究！
+
 ## Conclusion
 
 现在是2025年10月22日00:46:13，好困啊，我要睡觉了，今晚居然只做了两题嘛！
