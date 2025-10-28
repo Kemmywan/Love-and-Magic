@@ -84,7 +84,7 @@ GET 和 POST 都是 HTTP 协议中最常用的两种请求方式（方法），�
 
 但是直接在url里打开不了，显示图片无法显示。看来是apache的框架默认按照文件类型来解析文件，这下有点难办。
 
-于是又学到了新东西：apache的.htacess文件！
+于是又学到了新东西：apache的.htaccess文件！
 
 ```
 <FilesMatch "1.jpg">
