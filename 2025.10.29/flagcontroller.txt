@@ -1,0 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  javax.servlet.ServletException
+ *  javax.servlet.annotation.WebServlet
+ *  javax.servlet.http.HttpServlet
+ *  javax.servlet.http.HttpServletRequest
+ *  javax.servlet.http.HttpServletResponse
+ */
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(name="FlagController")
+public class FlagController
+extends HttpServlet {
+    String flag = "ZmxhZ3tkNTY1ZjdlNy01ZjhiLTQ5NjgtYjk5OC1mNTE0M2EzYzE1ZWV9Cg==";
+
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        PrintWriter printWriter = httpServletResponse.getWriter();
+        printWriter.print("<h1>Flag is nearby ~ Come on! ! !</h1>");
+    }
+}
