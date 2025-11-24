@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    restart: no
+    ports:
+      - 63601:5000
+    mem_limit: 300m
+    cpus: 1.0
+    environment:
+      - GZCTF_FLAG=flag{dummy}

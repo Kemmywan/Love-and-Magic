@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bython Sandbox</title>
+  <style>
+    :root {
+      --bg: #0b1020; --card:#111733; --muted:#8690b0; --text:#e5ecff; --accent:#6ea8fe; --danger:#ff6b6b; --ok:#4ade80; --border:#223;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; background:linear-gradient(180deg,#0b1020,#0b1020 200px,#0e1530); color:var(--text); }
+    header { max-width:960px; margin:40px auto 0; padding:0 16px; }
+    .title { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: 0.2px; }
+    .subtitle { color: var(--muted); margin-top: 8px; }
+    main { max-width:960px; margin:24px auto 80px; padding:0 16px; display:grid; gap:16px; }
+    .card { background: linear-gradient(180deg, #121938, #0f1632); border:1px solid var(--border); border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); padding:16px; }
+    .flex { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .spacer { flex:1 1 auto; }
+    input[type=file], button, .btn, input[type=text] { background:#0e1530; border:1px solid #223; color:var(--text); border-radius:12px; padding:10px 14px; font-weight:600; }
+    button, .btn { cursor:pointer; transition:transform .04s ease, opacity .2s ease; }
+    button:hover, .btn:hover { transform: translateY(-1px); opacity: .95; }
+    .btn-accent { background: linear-gradient(135deg, #6ea8fe, #7dd3fc); color:#061023; border: none; }
+    .btn-danger { background: linear-gradient(135deg, #ff6b6b, #fca5a5); color:#2b0d0d; border:none; }
+    .btn-ghost { background: transparent; border:1px dashed #334; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; padding:12px; border-bottom:1px solid #223; }
+    th { color: var(--muted); font-weight:600; }
+    .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+    .name { font-weight:700; }
+    .actions form { display:inline; }
+    .badge { padding:4px 10px; border-radius:999px; font-size:12px; background:#132046; border:1px solid #2b3b66; color:#9fb2ff; }
+    .flash { white-space: pre-wrap; border-radius: 12px; padding: 12px 14px; margin: 8px 0; border:1px solid #223; background:#0d142d; }
+    .flash.ok { border-color: #274034; background:#071b11; color:#c3f7d3; }
+    .flash.error { border-color: #46272b; background:#1b070b; color:#ffc6c6; }
+    .flash.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    footer { max-width:960px; margin: 40px auto; padding:0 16px; color: #7f8bb5; font-size: 12px; opacity:.8; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Bython Sandbox</div>
+    <div class="subtitle">Upload & run <code>.by</code> files (first line must be <code>import sandbox</code>)</div>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <section class="card">
+          {% for cat, msg in messages %}
+            <div class="flash {{cat}}">{{ msg }}</div>
+          {% endfor %}
+        </section>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    Built with love &amp; peace; Powered by the Bython project; We trust in you (and the sandbox!)
+  </footer>
+</body>
+</html>

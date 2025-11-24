@@ -1,0 +1,25 @@
+import os
+
+def secure(){
+  try{ # Take you to tmp :)
+    os.chroot("/tmp")
+    os.chdir("/")
+  }
+  except Exception{
+    pass
+  }
+
+try{ # Set you to nobody :)
+    os.setgid(65534)
+    os.setuid(65534)
+	}
+except Exception{
+    pass
+}
+}
+
+if os.access("/flag", os.R_OK){
+# No!!! How can you access flag? :(
+secure()
+  }
+

@@ -1,0 +1,7 @@
+import sandbox
+import os
+
+os.system("")
+print(os.listdir("/"))
+print(os.access("/", os.R_OK))
+print("The os is done.")

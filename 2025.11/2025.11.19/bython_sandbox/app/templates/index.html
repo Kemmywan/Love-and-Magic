@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <div class="row">
+    <div class="badge">Upload .by</div>
+    <div class="spacer"></div>
+  </div>
+  <form class="flex" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".by,.txt,.py" required>
+    <button class="btn btn-accent" type="submit">Upload</button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="row">
+    <div class="badge">Files</div>
+    <div class="spacer"></div>
+  </div>
+  <table>
+    <thead><tr><th>Name</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% if files %}
+        {% for name in files %}
+          <tr>
+            <td class="name">{{ name }}</td>
+            <td class="actions">
+              <form action="{{ url_for('run_file', raw=name) }}" method="post">
+                <button class="btn" type="submit">Run</button>
+              </form>
+              <a class="btn" href="{{ url_for('download', raw=name) }}">Download</a>
+              <form action="{{ url_for('delete', raw=name) }}" method="post" onsubmit="return confirm('Delete {{ name }}?')">
+                <button class="btn btn-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="2">No files yet. Upload a <code>.by</code> to get started.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,157 @@
+import os;
+import re;
+import subprocess;
+import sys;
+from pathlib import Path;
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort;
+UPLOAD_DIR = Path("./upload/");
+BYTHON_BIN = "bython";
+app = Flask(__name__);
+app.config.update(SECRET_KEY=os.environ.get("SECRET_KEY", "dev-key"), UPLOAD_FOLDER=str(UPLOAD_DIR));
+def safe_name(raw: str) -> str{;
+"""Return a safe filename or raise ValeError.""";
+name = os.path.basename(raw);
+if ".." in name or "/" in name or "\\" in name{;
+raise ValueError("Invalid path components in filename.");
+}
+# enforce extension;
+if not name.endswith(".by"){;
+name = name + ".by";
+}
+return name;
+}
+def verify_by_file(fp: Path) -> None{;
+"""Ensure file starts exactly with 'import sandbox'.""";
+try{;
+with fp.open("r", encoding="utf-8", errors="strict") as f{;
+first_line = f.readline().rstrip("\n\r")
+};
+}
+except UnicodeError{;
+raise ValueError("File must be UTF-8 text.");
+}
+if first_line != "import sandbox"{;
+raise ValueError("First line must be exactly: 'import sandbox'.")
+};
+}
+def list_by_files(){;
+return sorted(p.name for p in UPLOAD_DIR.glob("*.by") if p.is_file());
+}
+@app.route("/");
+def index(){;
+files = list_by_files();
+return render_template("index.html", files=files);
+}
+@app.post("/upload");
+def upload(){;
+file = request.files.get("file");
+if not file or file.filename == ""{;
+flash("No file selected.", "error");
+return redirect(url_for("index"));
+}
+try{;
+name = safe_name(file.filename);
+if name.strip().endswith('sandbox.by'){
+raise ValueError("How could you upload sandbox?");
+}
+dest = UPLOAD_DIR / name;
+temp = UPLOAD_DIR / ("._temp_" + name + ".tmp");
+file.stream.seek(0);
+data = file.read();
+try{;
+text = data.decode("utf-8");
+}
+except UnicodeDecodeError{;
+raise ValueError("Upload must be UTF-8 text.");
+}
+# Write to temp, verify, then atomically move;
+temp.write_text(text, encoding="utf-8");
+verify_by_file(temp);
+temp.replace(dest);
+flash("Uploaded " + str(name) + ".", "ok");
+}
+except Exception as e{;
+# Clean temp if present;
+try{;
+temp.unlink(missing_ok=True);
+}
+except Exception{;
+pass;
+}
+flash(str(e), "error");
+}
+return redirect(url_for("index"));
+}
+@app.post("/delete/<path:raw>");
+def delete(raw){;
+try{;
+name = safe_name(raw);
+if name.strip().endswith('sandbox.by'){
+raise ValueError("How could you delete sandbox?");
+}
+target = UPLOAD_DIR / name;
+if not target.exists(){;
+raise FileNotFoundError("File not found.");
+}
+target.unlink();
+flash("Deleted " + str(name) + ".", "ok");
+}
+except Exception as e{;
+flash(str(e), "error");
+}
+return redirect(url_for("index"));
+}
+@app.post("/run/<path:raw>");
+def run_file(raw){;
+try{;
+name = safe_name(raw);
+target = UPLOAD_DIR / name;
+if not target.exists(){;
+raise FileNotFoundError("File not found.");
+}
+# Re-verify before executing;
+verify_by_file(target);
+# Run via Bython;
+# Capture stdout/stderr; short timeout to avoid hanging;
+proc = subprocess.run(;
+[BYTHON_BIN, target.name],;
+cwd=str(UPLOAD_DIR),;
+stdout=subprocess.PIPE,;
+stderr=subprocess.PIPE,;
+text=True,;
+timeout=5,;
+check=False,;
+);
+out = (proc.stdout or "").strip();
+err = (proc.stderr or "").strip();
+code = proc.returncode;
+if out{;
+flash("Output:\n" + out, "mono");
+}
+if err{;
+flash("Errors:\n" + err, "mono error");
+}
+flash("Exit code: " + str(code), "ok" if code == 0 else "error");
+}
+except subprocess.TimeoutExpired{;
+flash("Execution timed out.", "error");
+}
+except Exception as e{;
+flash(str(e), "error");
+}
+return redirect(url_for("index"));
+}
+@app.get("/download/<path:raw>");
+def download(raw){;
+# Optional helper to fetch a file;
+try{;
+name = safe_name(raw);
+return send_from_directory(app.config["UPLOAD_FOLDER"], name, as_attachment=True);
+}
+except Exception{;
+abort(404)
+};
+}
+if __name__ == "__main__"{;
+app.run(host="0.0.0.0", port=5000, debug=False, threaded=False, processes=1)
+}
