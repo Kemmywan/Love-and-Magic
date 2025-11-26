@@ -1,0 +1,89 @@
+:root {
+    --gray: #AAAAAA;
+    --black: #222;
+    --section-font: 1.6em;
+    --subsection-font: 1.1em;
+    --main-font: 1em;
+}
+body {
+    font-family: "Segoe UI", "Arial", "sans-serif";
+    margin: 32px auto;
+    max-width: 800px;
+    color: var(--black);
+    background: #fff;
+}
+.name {
+    text-align: left;
+    font-family: "Yuanti SC", "圆体", "Segoe UI", Arial, sans-serif;
+    font-size: 2.5em;
+    font-weight: thin;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5em;
+}
+.contact {
+    text-align: left;
+    font-size: 1em;
+    color: var(--gray);
+    margin-bottom: 2em;
+}
+.section {
+    position: relative;
+    margin: 2em 0 1em 0;
+}
+.section-title {
+    font-size: var(--section-font);
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+}
+.section-title span.first3 {
+    color: var(--gray);
+}
+.section-title span.rest {
+    color: var(--black);
+}
+.underline {
+    flex: 1;
+    border-bottom: 2px solid var(--gray);
+    margin-left: 8px;
+    height: 0.45em;
+    position: relative;
+    top: 2px;
+}
+.subsection {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 0.9em;
+    margin-bottom: 0.1em;
+}
+.sub-left {
+    font-size: var(--subsection-font);
+    font-weight: bold;
+}
+.sub-right {
+    font-size: 0.9em;
+    color: var(--gray);
+    flex-shrink: 0;
+    margin-left: 8px;
+    text-align: right;
+}
+.subdesc-list {
+    list-style-type: disc;
+    color: #555;
+    margin-left: 2em;
+    margin-bottom: 0.3em;
+    padding-left: 0;
+    font-size: 1em;
+}
+.subdesc-list li {
+    margin-bottom: 0.2em;
+}
+.skill-list {
+    margin-left: 1em;
+    line-height: 1.7;
+}
+@media(max-width:600px){
+    body {max-width: 98vw; margin:10px;}
+}
